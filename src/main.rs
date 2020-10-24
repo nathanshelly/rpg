@@ -2,7 +2,7 @@
 // use std::path::Path;
 
 // fn main() {
-//   let path = Path::new("./resources/one_song.md");
+//   let path = Path::new("./src/resources/one_song.md");
 
 //   let contents =
 //     fs::read_to_string(path).expect("Something went wrong reading the file");

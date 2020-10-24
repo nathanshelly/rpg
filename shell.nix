@@ -7,6 +7,7 @@ in
 pkgs.mkShell {
   buildInputs = [
     pkgs.rust-analyzer
+    pkgs.cargo-watch
     rust
   ];
 }

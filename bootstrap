@@ -16,7 +16,15 @@ however you'd like.\n"
   # TODO: add optional nix-direnv installation
 
   printf "\nrunning \`nix-shell\` to enter the development environment"
-  nix-shell
+  # TODO: maybe remove need for `--pure` here?
+  #
+  # when using rspotify from master cargo install needs to build some required
+  # dependencies from source. this build fails clang file not found errors w/o
+  # the `--pure` flag
+  #
+  # based on anecdotal local testing seems to only be run like this once
+  # after dependencies have been installed future builds can be done impurely
+  nix-shell --pure
 }
 
 maybe_install_nix() {

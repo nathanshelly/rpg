@@ -10,30 +10,53 @@
 //   println!("With text:\n{}", contents);
 // }
 
-extern crate rspotify;
-
-use rspotify::client::Spotify;
-use rspotify::oauth2::SpotifyClientCredentials;
-use rspotify::senum::Country;
+use rspotify::client::SpotifyBuilder;
+use rspotify::oauth2::{CredentialsBuilder, OAuthBuilder};
 
 #[tokio::main]
 async fn main() {
-  // Set client_id and client_secret in .env file or
-  // export CLIENT_ID="your client_id"
-  // export CLIENT_SECRET="secret"
-  let client_credential = SpotifyClientCredentials::default().build();
+  // You can use any logger for debugging.
+  env_logger::init();
 
-  // Or set client_id and client_secret explictly
-  // let client_credential = SpotifyClientCredentials::default()
+  // Set RSPOTIFY_CLIENT_ID, RSPOTIFY_CLIENT_SECRET and
+  // RSPOTIFY_REDIRECT_URI in an .env file or export them manually:
+  //
+  // export RSPOTIFY_CLIENT_ID="your client_id"
+  // export RSPOTIFY_CLIENT_SECRET="secret"
+  //
+  // These will then be read with `from_env`.
+  //
+  // Otherwise, set client_id and client_secret explictly:
+  //
+  // let creds = CredentialsBuilder::default()
   //     .client_id("this-is-my-client-id")
   //     .client_secret("this-is-my-client-secret")
-  //     .build();
-  let spotify = Spotify::default()
-    .client_credentials_manager(client_credential)
-    .build();
-  let birdy_uri = "spotify:artist:2WX2uTcsvV5OnS0inACecP";
-  let tracks = spotify
-    .artist_top_tracks(birdy_uri, Country::UnitedStates)
-    .await;
-  println!("{:?}", tracks.unwrap());
+  //     .build()
+  //     .unwrap();
+  let creds = CredentialsBuilder::from_env().build().unwrap();
+
+  // Or set the redirect_uri explictly:
+  //
+  // let oauth = OAuthBuilder::default()
+  //     .redirect_uri("http://localhost:8888/callback")
+  //     .build()
+  //     .unwrap();
+  let oauth = OAuthBuilder::from_env()
+    .scope("user-read-recently-played")
+    .build()
+    .unwrap();
+
+  let mut spotify = SpotifyBuilder::default()
+    .credentials(creds)
+    .oauth(oauth)
+    .build()
+    .unwrap();
+
+  // Obtaining the access token
+  spotify.prompt_for_user_token().await.unwrap();
+
+  // Running the requests
+  let history = spotify.current_user_recently_played(10).await;
+
+  println!("Response: {:?}", history);
 }

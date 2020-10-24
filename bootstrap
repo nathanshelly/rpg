@@ -2,32 +2,48 @@
 
 # shellcheck disable=SC2016
 
-printf "This script bootstraps a Nix-based development environment that enables
+main() {
+  printf "This script bootstraps a Nix-based development environment that enables
 easy dependency management and portable builds.
 
 If you don't want to use Nix you can kill this script and install rustc & cargo
 however you'd like.\n"
 
-command -v nix-env > /dev/null || {
+  maybe_install_nix
+
+  maybe_install_niv
+
+  # TODO: add optional nix-direnv installation
+
+  printf "\nrunning \`nix-shell\` to enter the development environment"
+  nix-shell
+}
+
+maybe_install_nix() {
+  command -v nix-env > /dev/null && return 0
+
   printf "\nThis script requires Nix - https://nixos.org/. Hit \`y\` to install
 it or any other key to bail now: "
 
   read -r -n 1 maybe_continue
   if [[ $maybe_continue == 'y' ]]; then
-    curl https://nixos.org/nix/install | sh
+    printf "\n\ninstalling Nix...\n"
+    curl -L https://nixos.org/nix/install | sh
   else
     echo "Bailing w/o Nix"
     exit 1
   fi
 }
 
-command -v niv > /dev/null || {
-  printf "\nThis script requires niv - https://github.com/nmattia/niv/. Hit
-\`y\` to install it or any other key to bail now: "
+maybe_install_niv() {
+  command -v niv > /dev/null && return 0
+
+  printf "\nAre you developing on this project and want to add/remove
+dependencies? Hit \`y\` if so to install niv - https://github.com/nmattia/niv/: "
 
   read -r -n 1 maybe_continue
   if [[ $maybe_continue == 'y' ]]; then
-    printf "\n\ninstalling...\n"
+    printf "\n\ninstalling niv...\n"
     nix-env -iA nixpkgs.niv
   else
     echo "Bailing w/o niv"
@@ -35,7 +51,4 @@ command -v niv > /dev/null || {
   fi
 }
 
-# TODO: add optional nix-direnv installation
-
-printf "\nrunning \`nix-shell\` to enter the development environment"
-nix-shell
+main

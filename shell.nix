@@ -6,6 +6,7 @@ let
 in
 pkgs.mkShell {
   buildInputs = [
+    pkgs.rust-analyzer
     rust
   ];
 }

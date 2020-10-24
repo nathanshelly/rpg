@@ -1,0 +1,5 @@
+{
+  // TODO: remove this once https://github.com/mozilla/nixpkgs-mozilla/issues/238
+  // is resolved. Then global setting of "rust-analyzer" should work
+  "rust-analyzer.serverPath": "rust-analyzer"
+}
